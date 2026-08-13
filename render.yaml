@@ -1,12 +1,15 @@
 databases:
   - name: familytask-db
+    plan: free
 
 services:
   - type: web
-    name: familytask-back
-    env: python
+    name: familytask-api
+    runtime: python
+    plan: free
+    rootDir: step-6/backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port 8000
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -15,9 +18,18 @@ services:
 
   - type: web
     name: familytask-front
-    env: node
+    runtime: static
+    plan: free
+    rootDir: step-6/frontend
     buildCommand: npm install && npm run build
-    startCommand: npx serve -s dist -l 3000
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://familytask-back.onrender.com
+        fromService:
+          type: web
+          name: familytask-api
+          property: host
