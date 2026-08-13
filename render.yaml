@@ -7,7 +7,7 @@ services:
     name: familytask-api
     runtime: python
     plan: free
-    rootDir: step-6/backend
+    rootDir: step-7/backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -20,7 +20,7 @@ services:
     name: familytask-front
     runtime: static
     plan: free
-    rootDir: step-6/frontend
+    rootDir: step-7/frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     routes:
