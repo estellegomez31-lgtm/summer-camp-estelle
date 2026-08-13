@@ -13,9 +13,11 @@ services:
           name: familytask-db
           property: connectionString
 
-  - type: static
+  - type: web
+    env: node
     name: familytask-front
     buildCommand: npm install && npm run build
+    startCommand: npx serve -s dist -l 3000
     publishPath: dist
     envVars:
       - key: VITE_API_URL
