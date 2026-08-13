@@ -14,11 +14,10 @@ services:
           property: connectionString
 
   - type: web
-    env: node
     name: familytask-front
+    env: node
     buildCommand: npm install && npm run build
     startCommand: npx serve -s dist -l 3000
-    publishPath: dist
     envVars:
       - key: VITE_API_URL
         value: https://familytask-back.onrender.com
