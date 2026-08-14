@@ -58,22 +58,6 @@ onMounted(refresh)
     <button class="primary block" @click="router.push('/taches')">Aller à mes tâches →</button>
 
     <div class="card">
-      <h3>Créer un compte</h3>
-      <div class="row"><input v-model="nName" placeholder="Prénom (ex : Léa)" /></div>
-      <div class="row"><input v-model="nEmail" type="email" placeholder="Email (ex : lea@durand.fr)" /></div>
-      <div class="row"><input v-model="nPass" type="password" placeholder="Mot de passe" /></div>
-      <div class="row">
-        <input v-model="nLien" list="liens-list" placeholder="Lien (ex : fils, belle-mère…)" />
-        <datalist id="liens-list">
-          <option v-for="l in liens" :key="l" :value="l" />
-        </datalist>
-        <label class="check"><input type="checkbox" v-model="nAdmin" /> admin</label>
-      </div>
-      <button class="primary block" @click="createAccount">Créer le compte</button>
-      <p class="err" v-if="msg">{{ msg }}</p>
-    </div>
-
-    <div class="card">
       <h3>Membres de la famille</h3>
       <div class="mlist">
         <div v-for="m in members" :key="m.id" class="mrow">
