@@ -16,7 +16,6 @@ const nPass = ref('')
 const nLien = ref('')
 const nAdmin = ref(false)
 const msg = ref('')
-const newLien = ref('')
 
 async function refresh() {
   members.value = await (await fetch(`${API}/api/members`, { headers: authHeaders() })).json()
@@ -26,18 +25,21 @@ async function refresh() {
 }
 async function createAccount() {
   msg.value = ''
-  if (!nName.value.trim() || !nEmail.value.trim() || !nPass.value) { msg.value = 'Prénom, email et mot de passe requis.'; return }
-  const q = new URLSearchParams({ name: nName.value.trim(), email: nEmail.value.trim(), password: nPass.value, lien: nLien.value, is_admin: nAdmin.value })
+  if (!nName.value.trim() || !nEmail.value.trim() || !nPass.value || !nLien.value.trim()) {
+    msg.value = 'Prénom, email, mot de passe et lien requis.'
+    return
+  }
+  const lien = nLien.value.trim()
+  // Si ce lien n'existe pas encore pour la famille, on l'ajoute d'abord à la liste.
+  if (!liens.value.includes(lien)) {
+    const ql = new URLSearchParams({ label: lien })
+    liens.value = await (await fetch(`${API}/api/liens?${ql}`, { method: 'POST', headers: authHeaders() })).json()
+  }
+  const q = new URLSearchParams({ name: nName.value.trim(), email: nEmail.value.trim(), password: nPass.value, lien, is_admin: nAdmin.value })
   const r = await fetch(`${API}/api/members?${q}`, { method: 'POST', headers: authHeaders() })
   if (!r.ok) { const d = await r.json().catch(() => ({})); msg.value = d.detail || 'Erreur.'; return }
   nName.value = ''; nEmail.value = ''; nPass.value = ''; nAdmin.value = false
   await refresh()
-}
-async function addLien() {
-  if (!newLien.value.trim()) return
-  const q = new URLSearchParams({ label: newLien.value.trim() })
-  liens.value = await (await fetch(`${API}/api/liens?${q}`, { method: 'POST', headers: authHeaders() })).json()
-  nLien.value = newLien.value.trim(); newLien.value = ''
 }
 async function removeMember(m) {
   if (!confirm(`Supprimer le compte de ${m.name} et ses tâches ?`)) return
@@ -61,15 +63,14 @@ onMounted(refresh)
       <div class="row"><input v-model="nEmail" type="email" placeholder="Email (ex : lea@durand.fr)" /></div>
       <div class="row"><input v-model="nPass" type="password" placeholder="Mot de passe" /></div>
       <div class="row">
-        <select v-model="nLien"><option v-for="l in liens" :key="l" :value="l">{{ l }}</option></select>
+        <input v-model="nLien" list="liens-list" placeholder="Lien (ex : fils, belle-mère…)" />
+        <datalist id="liens-list">
+          <option v-for="l in liens" :key="l" :value="l" />
+        </datalist>
         <label class="check"><input type="checkbox" v-model="nAdmin" /> admin</label>
       </div>
       <button class="primary block" @click="createAccount">Créer le compte</button>
       <p class="err" v-if="msg">{{ msg }}</p>
-      <div class="row addlien">
-        <input v-model="newLien" placeholder="Ajouter un lien (ex : belle-mère)" @keyup.enter="addLien" />
-        <button class="ghost" @click="addLien">+ lien</button>
-      </div>
     </div>
 
     <div class="card">
