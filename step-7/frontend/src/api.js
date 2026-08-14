@@ -1,5 +1,6 @@
 // Adresse du back. En local : vide (le proxy Vite gère /api).
-export const API = ''
+// En production (Render) : définie via la variable d'environnement VITE_API_URL.
+export const API = import.meta.env.VITE_API_URL || ''
 
 // --- Session : jeton + membre connecté (gardés en localStorage) ---
 let token = localStorage.getItem('token') || ''
