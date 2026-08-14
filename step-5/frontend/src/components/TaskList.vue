@@ -12,13 +12,23 @@ function memberName(id) {
 </script>
 
 <template>
-  <ul>
-    <li v-for="t in tasks" :key="t.id" :class="{ done: t.done }">
-      <input type="checkbox" :checked="t.done" @change="emit('toggle', t)" />
-      <span>{{ t.title }}</span>
-      <span class="who" v-if="memberName(t.member_id)">👤 {{ memberName(t.member_id) }}</span>
-      <button class="trash" @click="emit('remove', t)">🗑</button>
+  <ul class="tasklist">
+    <li v-for="t in props.tasks" :key="t.id">
+      <span :class="{ done: t.done }">{{ t.title }}</span>
+      <small> → {{ memberName(t.member_id) }}</small>
+
+      <button @click="emit('toggle', t.id)">✔</button>
+      <button @click="emit('remove', t.id)">🗑</button>
     </li>
-    <li v-if="tasks.length === 0" class="hint">Aucune tâche pour l'instant.</li>
   </ul>
 </template>
+
+<style scoped>
+.tasklist {
+  list-style: none;
+  padding: 0;
+}
+.done {
+  text-decoration: line-through;
+}
+</style>

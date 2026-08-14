@@ -1,12 +1,8 @@
 services:
   frontend:
-    image: node:20
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
+    build: ./frontend
     ports:
-      - "5173:5173"
-    command: sh -c "npm install && npm run dev -- --host"
+      - "5173:80"
     depends_on:
       - backend
 

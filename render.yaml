@@ -19,7 +19,6 @@ services:
   - type: web
     name: familytask-front
     runtime: static
-    plan: free
     rootDir: step-7/frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist

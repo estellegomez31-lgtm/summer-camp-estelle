@@ -1,20 +1,21 @@
-/* ===========================================================================
+  /* ============================================================================
    FamilyTask — design mobile (introduit à l'atelier 2)
    Une seule page : en-tête + cartes. Mode clair et sombre.
    =========================================================================== */
+
 :root {
-  --bg: #f3f4fb; --grad-1: #6d5efc; --grad-2: #a855f7;
-  --surface: #fff; --surface-2: #f4f5fb; --border: #e8e9f3;
-  --text: #171b2e; --muted: #7b8194;
-  --accent: #6d5efc; --accent-strong: #5646e6; --accent-soft: #eeecff;
-  --danger: #f43f5e; --danger-soft: #fdeef1;
-  --radius: 16px; --shadow: 0 1px 2px rgba(23,27,46,.05), 0 10px 30px rgba(23,27,46,.08);
+  --bg: #fff8ec; --grad-1: #f6b93b; --grad-2: #dc2626;
+  --surface: #fff; --surface-2: #fff3d6; --border: #f5dfa8;
+  --text: #2b1608; --muted: #dd8e3a;
+  --accent: #dc2626; --accent-strong: #b91c1c; --accent-soft: #fef0c7;
+  --danger: #991b1b; --danger-soft: #fde4de;
+  --radius: 16px; --shadow: 0 1px 2px rgba(43,22,8,.06), 0 10px 30px rgba(43,22,8,.10);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0c0f1c; --surface: #161a2c; --surface-2: #1d2236; --border: #2a3050;
-    --text: #e9ecfa; --muted: #98a0bb; --accent-soft: #241f4d; --danger-soft: #3a1622;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 14px 34px rgba(0,0,0,.45);
+    --bg: #180d07; --surface: #241408; --surface-2: #7a4119; --border: #966c50;
+    --text: #fdf1dd; --muted: #c9a67d; --accent-soft: #752e20; --danger-soft: #3d1712;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 14px 34px rgba(0,0,0,.5);
   }
 }
 
@@ -22,17 +23,17 @@
 body {
   margin: 0; color: var(--text);
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: radial-gradient(1000px 500px at 50% -10%, #dcd8ff 0%, var(--bg) 55%);
+  background: radial-gradient(1000px 500px at 50% -10%, #ffe3ab 0%, var(--bg) 55%);
   -webkit-font-smoothing: antialiased;
 }
 @media (prefers-color-scheme: dark) {
-  body { background: radial-gradient(1000px 500px at 50% -10%, #1a1740 0%, var(--bg) 55%); }
+  body { background: radial-gradient(1000px 500px at 50% -10%, #401c0c 0%, var(--bg) 55%); }
 }
 
 header {
   position: sticky; top: 0; z-index: 10;
   background: linear-gradient(120deg, var(--grad-1), var(--grad-2));
-  color: #fff; padding: 18px 20px; box-shadow: 0 6px 24px rgba(109,94,252,.28);
+  color: #fff; padding: 18px 20px; box-shadow: 0 6px 24px rgba(220,38,38,.28);
 }
 header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
 
@@ -54,7 +55,7 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px 
 button {
   border: none; cursor: pointer; font-weight: 700; color: #fff;
   background: linear-gradient(120deg, var(--grad-1), var(--grad-2));
-  box-shadow: 0 6px 16px rgba(109,94,252,.3);
+  box-shadow: 0 6px 16px rgba(220,38,38,.3);
 }
 button:hover { filter: brightness(1.05); }
 button:active { transform: translateY(1px); }
@@ -72,3 +73,83 @@ input[type="checkbox"] { width: 22px; height: 22px; flex: none; padding: 0; acce
 .trash { background: none; border: none; color: var(--danger); padding: 4px 9px; font-size: 17px; box-shadow: none; width: auto; }
 .trash:hover { background: var(--danger-soft); filter: none; }
 .hint { font-size: 13px; color: var(--muted); padding: 10px 4px; }
+
+ /*===========================================================================
+   Cadre mobile — étape 7 : cadre plein écran + barre d'onglets
+   =========================================================================== */
+.phone {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.appbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(120deg, var(--grad-1), var(--grad-2));
+  color: #fff; padding: 14px 18px;
+  box-shadow: 0 6px 24px rgba(220,38,38,.28);
+}
+.appbar .brand { font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
+.appbar .link {
+  background: rgba(255,255,255,.16); color: #fff; border: none;
+  padding: 8px 14px; font-size: 13px; font-weight: 700; border-radius: 10px;
+  box-shadow: none; cursor: pointer;
+}
+.appbar .link:hover { background: rgba(255,255,255,.26); filter: none; }
+
+.screen {
+  flex: 1;
+  padding-bottom: 78px; /* laisse la place pour la tabbar fixée en bas */
+}
+
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+  display: flex; justify-content: space-around;
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(43,22,8,.08);
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  text-decoration: none; padding: 4px 18px; border-radius: 10px;
+}
+.tab .ico { font-size: 20px; }
+.tab.router-link-active {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  }
+
+  .block {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+/* ===========================================================================
+   Écran d'authentification (Login / Signup)
+   =========================================================================== */
+.auth {
+  max-width: 420px;
+  margin: 40px auto;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.hero { text-align: center; }
+.hero .logo { font-size: 40px; margin-bottom: 8px; }
+.hero h1 { margin: 0 0 6px; font-size: 26px; font-weight: 800; }
+.hero p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 20px; display: flex; flex-direction: column; gap: 10px;
+}
+.panel label { font-size: 13px; font-weight: 700; color: var(--muted); margin-top: 4px; }
+.panel label { display: block; }
+.panel input { display: block; width: 100%; }
+.panel .err { color: var(--danger); font-size: 13px; margin: 0; }
+.panel .switch { text-align: center; font-size: 14px; color: var(--muted); margin: 6px 0 0; }
+.panel .switch a { color: var(--accent-strong); font-weight: 700; text-decoration: none; }

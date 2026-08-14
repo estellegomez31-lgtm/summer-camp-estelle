@@ -41,11 +41,11 @@ services:
 # Pour l'activer : retire le "#" devant les 4 lignes du service "ai" et devant
 # la ligne "ollama:" en bas, puis relance : docker compose up
 # ---------------------------------------------------------------------------
-#  ai:
-#    image: ollama/ollama
-#    volumes:
-#      - ollama:/root/.ollama
+  ai:
+    image: ollama/ollama
+    volumes:
+      - ollama:/root/.ollama
 
 volumes:
   pgdata:
-#  ollama:
+  ollama:

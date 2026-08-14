@@ -1,22 +1,57 @@
 <script setup>
-import { ref } from 'vue'
 import TaskList from './components/TaskList.vue'
+import { ref, onMounted } from 'vue'
 
 // Données locales (pas encore de base de données) — juste pour construire l'interface.
-const tasks = ref([
-  { id: 1, title: 'Sortir les poubelles', done: false },
-  { id: 2, title: 'Faire les courses', done: true },
-])
+const tasks = ref([])
 const newTitle = ref('')
 let nextId = 3
 
-function addTask() {
-  if (!newTitle.value.trim()) return
-  tasks.value.push({ id: nextId++, title: newTitle.value, done: false })
-  newTitle.value = ''
+// Charger les tâches depuis l'API
+async function loadTasks() {
+  const res = await fetch('/api/tasks')
+  tasks.value = await res.json()
 }
-function toggle(t) { t.done = !t.done }
-function remove(t) { tasks.value = tasks.value.filter(x => x.id !== t.id) }
+
+// Ajouter une tâche
+async function addTask() {
+  if (!newTitle.value.trim()) return
+
+  await fetch('/api/tasks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: newTitle.value,
+      done: false
+    })
+  })
+
+  newTitle.value = ''
+  loadTasks()  // ⭐ recharge la liste
+}
+
+// Cocher une tâche (PATCH)
+async function toggleTask(id) {
+  await fetch(`/api/tasks/${id}`, {
+    method: 'PATCH'
+  })
+
+  loadTasks()  // ⭐ recharge la liste
+}
+
+// Supprimer une tâche (DELETE)
+async function removeTask(id) {
+  await fetch(`/api/tasks/${id}`, {
+    method: 'DELETE'
+  })
+
+  loadTasks()  // ⭐ recharge la liste
+}
+
+
+onMounted(loadTasks)
+
+
 </script>
 
 <template>
@@ -31,7 +66,7 @@ function remove(t) { tasks.value = tasks.value.filter(x => x.id !== t.id) }
     </div>
     <div class="card">
       <h2>Les tâches</h2>
-      <TaskList :tasks="tasks" @toggle="toggle" @remove="remove" />
+      <TaskList :tasks="tasks" @toggle="toggleTask" @remove="removeTask" />
     </div>
   </main>
 </template>

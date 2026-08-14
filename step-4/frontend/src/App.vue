@@ -1,44 +1,40 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import TaskList from './components/TaskList.vue'
+import { useRouter } from 'vue-router'
+import { isLogged, getMe, logout as apiLogout } from './api.js'
 
-// Les tâches viennent maintenant du back (elles sont sauvegardées en base).
-const tasks = ref([])
-const newTitle = ref('')
+const router = useRouter()
+const me = getMe()
 
-async function refresh() {
-  tasks.value = await (await fetch('/api/tasks')).json()
+function logout() {
+  apiLogout()
+  router.push('/login')
 }
-async function addTask() {
-  if (!newTitle.value.trim()) return
-  await fetch(`/api/tasks?${new URLSearchParams({ title: newTitle.value })}`, { method: 'POST' })
-  newTitle.value = ''
-  await refresh()
-}
-async function toggle(t) {
-  await fetch(`/api/tasks/${t.id}`, { method: 'PATCH' })
-  await refresh()
-}
-async function remove(t) {
-  await fetch(`/api/tasks/${t.id}`, { method: 'DELETE' })
-  await refresh()
-}
-onMounted(refresh)
 </script>
 
 <template>
-  <header><h1>🏠 FamilyTask</h1></header>
-  <main>
-    <div class="card">
-      <h2>Nouvelle tâche</h2>
-      <div class="row">
-        <input v-model="newTitle" placeholder="Ex: Sortir les poubelles" @keyup.enter="addTask" />
-        <button @click="addTask">Ajouter</button>
-      </div>
+  <div class="phone">
+    <!-- Barre du haut -->
+    <div class="appbar">
+      <div class="brand">FamilyTask</div>
+      <button class="link" @click="logout">Quitter</button>
     </div>
-    <div class="card">
-      <h2>Les tâches (sauvegardées)</h2>
-      <TaskList :tasks="tasks" @toggle="toggle" @remove="remove" />
+
+    <!-- Contenu de l'écran -->
+    <div class="screen">
+      <router-view />
     </div>
-  </main>
+
+    <!-- Barre d'onglets -->
+    <div class="tabbar" v-if="isLogged">
+      <router-link class="tab" to="/taches">
+        <div class="ico">📋</div>
+        Tâches
+      </router-link>
+
+      <router-link class="tab" to="/famille" v-if="me && me.is_admin">
+        <div class="ico">👨‍👩‍👧</div>
+        Famille
+      </router-link>
+    </div>
+  </div>
 </template>

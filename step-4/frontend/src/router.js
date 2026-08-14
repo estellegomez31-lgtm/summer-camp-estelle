@@ -4,22 +4,26 @@ import Login from './views/Login.vue'
 import Signup from './views/Signup.vue'
 import TasksView from './views/TasksView.vue'
 import FamilyView from './views/FamilyView.vue'
+import { getMe } from './api.js'
+
 
 const routes = [
   { path: '/', redirect: '/taches' },
   { path: '/login', component: Login },
   { path: '/signup', component: Signup },
   { path: '/taches', component: TasksView, meta: { auth: true, nav: true } },
-  { path: '/famille', component: FamilyView, meta: { auth: true, nav: true, admin: true
-     } },
-  { path: "/assistant", component: () => import("./components/ChatAssistant.vue") } 
+  { path: '/famille', component: FamilyView, meta: { auth: true, nav: true, admin: true } },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })
 
-router.beforeEach((to) => {
-  if (to.meta.auth && !isLogged()) return '/login'
-  if ((to.path === '/login' || to.path === '/signup') && isLogged()) return '/taches'
+router.beforeEach((to, from, next) => {
+  if (to.meta.auth && !isLogged()) return next('/login')
+  if (to.meta.admin && !(getMe() && getMe().is_admin)) return next('/taches')
+  if ((to.path === '/login' || to.path === '/signup') && isLogged()) return next('/taches')
+
+  next()
 })
+
 
 export default router

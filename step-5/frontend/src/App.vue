@@ -9,17 +9,32 @@ function logout() { apiLogout(); router.push('/login') }
 </script>
 
 <template>
-  <div class="phone">
-    <header class="appbar" v-if="isLogged() && route.meta.nav">
-      <div class="brand">🏠 FamilyTask</div>
-      <button class="link" @click="logout">Quitter</button>
-    </header>
-
-    <main class="screen"><router-view /></main>
-
-    <nav class="tabbar" v-if="isLogged() && route.meta.nav">
-      <router-link to="/taches" class="tab"><span class="ico">✅</span>Tâches</router-link>
-      <router-link v-if="getMe() && getMe().is_admin" to="/famille" class="tab"><span class="ico">👨‍👩‍👧</span>Famille</router-link>
+  <div>
+    <nav>
+      <router-link to="/">Accueil</router-link>
+      <router-link to="/tasks">Tâches</router-link>
+      <router-link to="/members">Famille</router-link>
+      <router-link to="/assistant">Assistant</router-link>
+      <button @click="logout">Déconnexion</button>
     </nav>
+
+    <router-view />
   </div>
 </template>
+
+<script setup>
+import { useRouter } from 'vue-router'
+import { logout as apiLogout } from './api.js'
+
+const router = useRouter()
+function logout() { apiLogout(); router.push('/login') }
+</script>
+
+<style>
+nav {
+  display: flex;
+  gap: 15px;
+  padding: 10px;
+  background: #eee;
+}
+</style>

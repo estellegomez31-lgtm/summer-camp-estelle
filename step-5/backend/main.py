@@ -1,11 +1,33 @@
 import os
 import hashlib
 import secrets
+import httpx
 from typing import Optional
 
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel, Field, Session, create_engine, select
+from pydantic import BaseModel
+
+OLLAMA_URL = "http://ai:11434"
+
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "ajouter_tache",
+            "description": "Créer une tâche pour un membre de la famille",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "titre": {"type": "string"},
+                    "personne": {"type": "string"}
+                },
+                "required": ["titre", "personne"]
+            }
+        }
+    }
+]
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///familytask.db")
 if DATABASE_URL.startswith("postgres://"):
@@ -47,6 +69,9 @@ class Task(SQLModel, table=True):
     done: bool = False
     member_id: Optional[int] = Field(default=None, foreign_key="member.id")   # assignée à
     created_by: Optional[int] = Field(default=None, foreign_key="member.id")  # donnée par
+
+class AssistantMessage(BaseModel):
+    message: str  
 
 
 def get_session():
@@ -248,3 +273,77 @@ def delete_task(task_id: int, me: Member = Depends(current_member),
     if task and task.family_code == me.family_code:
         session.delete(task); session.commit()
     return {"ok": True}
+
+@app.post("/api/assistant")
+async def assistant(body: AssistantMessage, 
+                    me: Member = Depends(current_member),
+                    session: Session = Depends(get_session)):
+
+    msg = body.message.lower()
+
+    # --- Désambiguïsation : "ma fille" ---
+    if "ma fille" in msg:
+        filles = session.exec(
+            select(Member).where(
+                Member.family_code == me.family_code,
+                Member.lien == "fille"
+            )
+        ).all()
+
+        if len(filles) > 1:
+            noms = ", ".join([f.name for f in filles])
+            return {"reply": f"Il y a plusieurs filles ({noms}). Pour laquelle veux‑tu ajouter la tâche ?"}
+    # Appel à Ollama avec toolsa
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                f"{OLLAMA_URL}/api/chat",
+                json={
+                    "model": "qwen2.5:3b",
+                    "messages": [
+                        {"role": "user", "content": body.message}
+                    ],
+                    "tools": TOOLS
+                },
+                timeout=20
+            )
+    except Exception:
+        raise HTTPException(status_code=503, detail="IA non disponible")
+
+    data = r.json()
+
+    # Vérifier si l'IA appelle un outil
+    tool_calls = data.get("message", {}).get("tool_calls")
+
+    if tool_calls:
+        call = tool_calls[0]
+        if call["function"]["name"] == "ajouter_tache":
+            args = call["function"]["arguments"]
+            titre = args.get("titre")
+            personne = args.get("personne")
+
+            # Trouver la personne dans la famille
+            membre = session.exec(
+                select(Member).where(
+                    Member.family_code == me.family_code,
+                    Member.name.ilike(personne)
+                )
+            ).first()
+
+            if not membre:
+                return {"reply": f"Je ne trouve personne nommé {personne} dans ta famille."}
+
+            # Créer la tâche
+            task = Task(
+                family_code=me.family_code,
+                title=titre,
+                member_id=membre.id,
+                created_by=me.id
+            )
+            session.add(task)
+            session.commit()
+
+            return {"reply": f"J'ai ajouté la tâche « {titre} » pour {membre.name}."}
+
+    # Sinon : réponse normale de l'IA
+    return {"reply": data["message"]["content"]}
