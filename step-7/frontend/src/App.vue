@@ -128,3 +128,10 @@ function logout() {
   to { opacity: 1; transform: scaleX(1); }
 }
 </style>
+<style>
+/* ... tes animations ... */
+
+.tab {
+  cursor: default;
+}
+</style>
